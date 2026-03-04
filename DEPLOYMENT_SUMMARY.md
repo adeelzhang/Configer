@@ -2,7 +2,7 @@
 
 ## ✅ 部署状态
 
-**部署时间**: 2026-03-05 01:37  
+**部署时间**: 2026-03-05 01:49  
 **服务器**: ubuntu@107.150.112.163  
 **域名**: https://configr.modelbridge.cc
 
@@ -13,63 +13,63 @@
 - **管理员密码**: `HSeKykRwTNEaB6JXDZu8ww==`
 
 ### API 访问
-- **API Key** (只读): `cee64fd5576ac336ef3b1b1ecf1c9cdc22672e22a88c2b2e0ad74eab39a7f587`
+- **读取配置**: 完全开放，无需认证
 - **健康检查**: https://configr.modelbridge.cc/health
 
 ## 📝 权限说明
 
-### API Key（只读权限）
-- ✅ 支持 GET 请求（读取配置）
-- ❌ 禁止 POST/PUT/DELETE 请求（修改操作）
-- 用于外部程序读取配置
+### 读取配置（完全开放）
+- ✅ GET 请求无需任何认证
+- ✅ 任何人都可以通过 key 读取配置
+- ✅ 适合外网程序直接调用
 
-### Session Token（完全权限）
-- ✅ 支持所有操作（增删改查）
-- 通过 Web 界面登录获取
-- Token 有效期 24 小时
+### 修改配置（仅管理端）
+- ❌ POST/PUT/DELETE 请求需要登录
+- ❌ 必须通过 Web 界面登录后操作
+- ✅ 保证配置安全，防止误操作
 
 ## 🧪 测试示例
 
-### 1. 读取配置（使用 API Key）
+### 1. 读取单个配置（无需认证）
 
 ```bash
-curl -H "X-API-Key: cee64fd5576ac336ef3b1b1ecf1c9cdc22672e22a88c2b2e0ad74eab39a7f587" \
-  https://configr.modelbridge.cc/api/config
+curl https://configr.modelbridge.cc/api/config/fundMode
 ```
 
-### 2. 尝试修改（会被拒绝）
+**响应:**
+```json
+{
+  "config": {
+    "key": "fundMode",
+    "value": "1",
+    "createdAt": "2026-03-04T17:42:07.312Z",
+    "updatedAt": "2026-03-04T17:42:07.312Z"
+  }
+}
+```
+
+### 2. 读取所有配置（无需认证）
+
+```bash
+curl https://configr.modelbridge.cc/api/config
+```
+
+### 3. 尝试修改（会被拒绝）
 
 ```bash
 curl -X POST \
-  -H "X-API-Key: cee64fd5576ac336ef3b1b1ecf1c9cdc22672e22a88c2b2e0ad74eab39a7f587" \
   -H "Content-Type: application/json" \
   -d '{"key":"test","value":"123"}' \
   https://configr.modelbridge.cc/api/config
 
-# 响应: {"error":"API Key only allows read-only access. Use web interface to modify configurations."}
+# 响应: {"error":"Unauthorized. Please login via web interface to modify configurations."}
 ```
 
-### 3. 通过 Web 界面修改
+### 4. 通过 Web 界面修改
 
 1. 访问 https://configr.modelbridge.cc
 2. 使用密码 `HSeKykRwTNEaB6JXDZu8ww==` 登录
 3. 在界面中进行增删改查操作
-
-### 4. 使用 Session Token 修改
-
-```bash
-# 登录获取 Token
-TOKEN=$(curl -s -X POST https://configr.modelbridge.cc/api/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{"password":"HSeKykRwTNEaB6JXDZu8ww=="}' | jq -r '.token')
-
-# 创建配置
-curl -X POST \
-  -H "Authorization: Bearer $TOKEN" \
-  -H "Content-Type: application/json" \
-  -d '{"key":"app.name","value":"My App"}' \
-  https://configr.modelbridge.cc/api/config
-```
 
 ## 🐳 Docker 容器状态
 

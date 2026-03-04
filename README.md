@@ -40,20 +40,30 @@ docker compose up -d
 
 ### 认证
 
-#### API Key（只读权限）
+#### 读取配置（无需认证）
 
-外部 API 调用使用 API Key，**仅支持读取操作**（GET 请求）：
+所有 GET 请求完全开放，无需任何认证：
 
+```bash
+curl https://configr.modelbridge.cc/api/config/fundMode
 ```
-X-API-Key: your-api-key
-```
 
-#### Session Token（完全权限）
+#### 修改配置（需要登录）
 
-Web 界面登录后获取 Session Token，支持所有操作（增删改查）：
+POST/PUT/DELETE 请求需要通过 Web 界面登录后获取 Session Token：
 
-```
-Authorization: Bearer {session-token}
+```bash
+# 登录获取 Token
+TOKEN=$(curl -s -X POST https://configr.modelbridge.cc/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"password":"your-password"}' | jq -r '.token')
+
+# 使用 Token 创建配置
+curl -X POST \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"key":"app.name","value":"My App"}' \
+  https://configr.modelbridge.cc/api/config
 ```
 
 ### 端点
