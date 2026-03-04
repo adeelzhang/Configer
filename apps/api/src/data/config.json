@@ -1,0 +1,16 @@
+{
+  "configs": [
+    {
+      "key": "app.name",
+      "value": "Configer Updated",
+      "createdAt": "2026-03-04T17:24:18.103Z",
+      "updatedAt": "2026-03-04T17:24:29.101Z"
+    },
+    {
+      "key": "db.host",
+      "value": "localhost:5432",
+      "createdAt": "2026-03-04T17:24:23.868Z",
+      "updatedAt": "2026-03-04T17:24:23.868Z"
+    }
+  ]
+}
