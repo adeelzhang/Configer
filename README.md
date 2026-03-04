@@ -40,10 +40,20 @@ docker compose up -d
 
 ### 认证
 
-所有 API 请求需要在 Header 中携带 API Key：
+#### API Key（只读权限）
+
+外部 API 调用使用 API Key，**仅支持读取操作**（GET 请求）：
 
 ```
 X-API-Key: your-api-key
+```
+
+#### Session Token（完全权限）
+
+Web 界面登录后获取 Session Token，支持所有操作（增删改查）：
+
+```
+Authorization: Bearer {session-token}
 ```
 
 ### 端点
@@ -53,15 +63,17 @@ X-API-Key: your-api-key
 GET /api/config
 ```
 
-#### 获取单个配置
+#### 获取单个配置（API Key 支持）
 ```
 GET /api/config/:key
+X-API-Key: your-api-key
 ```
 
-#### 创建配置
+#### 创建配置（仅 Session Token）
 ```
 POST /api/config
 Content-Type: application/json
+Authorization: Bearer {session-token}
 
 {
   "key": "app.name",
@@ -69,19 +81,21 @@ Content-Type: application/json
 }
 ```
 
-#### 更新配置
+#### 更新配置（仅 Session Token）
 ```
 PUT /api/config/:key
 Content-Type: application/json
+Authorization: Bearer {session-token}
 
 {
   "value": "New Value"
 }
 ```
 
-#### 删除配置
+#### 删除配置（仅 Session Token）
 ```
 DELETE /api/config/:key
+Authorization: Bearer {session-token}
 ```
 
 ## 配置

@@ -126,6 +126,11 @@ interface ConfigItem {
 
 ### 认证
 
+Configer 提供两种认证方式：
+
+1. **API Key（只读权限）**: 用于外部程序读取配置，只支持 GET 请求
+2. **Session Token（完全权限）**: 用于 Web 界面，支持所有操作（增删改查）
+
 #### 1. 登录（获取 Session Token）
 
 ```http
@@ -164,10 +169,13 @@ Authorization: Bearer {token}
 ### 配置管理
 
 所有配置管理 API 需要认证：
-- 方式 1: Header `X-API-Key: your-api-key`
-- 方式 2: Header `Authorization: Bearer {session-token}`
+- **读取操作（GET）**: 支持 API Key 或 Session Token
+  - Header `X-API-Key: your-api-key`
+  - Header `Authorization: Bearer {session-token}`
+- **修改操作（POST/PUT/DELETE）**: 仅支持 Session Token
+  - Header `Authorization: Bearer {session-token}`
 
-#### 1. 获取所有配置
+#### 1. 获取所有配置（API Key 或 Session Token）
 
 ```http
 GET /api/config
@@ -189,7 +197,7 @@ X-API-Key: your-api-key
 }
 ```
 
-#### 2. 获取单个配置
+#### 2. 获取单个配置（API Key 或 Session Token）
 
 ```http
 GET /api/config/{key}
@@ -209,12 +217,12 @@ X-API-Key: your-api-key
 }
 ```
 
-#### 3. 创建配置
+#### 3. 创建配置（仅 Session Token）
 
 ```http
 POST /api/config
 Content-Type: application/json
-X-API-Key: your-api-key
+Authorization: Bearer {session-token}
 
 {
   "key": "app.name",
@@ -235,12 +243,12 @@ X-API-Key: your-api-key
 }
 ```
 
-#### 4. 更新配置
+#### 4. 更新配置（仅 Session Token）
 
 ```http
 PUT /api/config/{key}
 Content-Type: application/json
-X-API-Key: your-api-key
+Authorization: Bearer {session-token}
 
 {
   "value": "New Value"
@@ -260,11 +268,11 @@ X-API-Key: your-api-key
 }
 ```
 
-#### 5. 删除配置
+#### 5. 删除配置（仅 Session Token）
 
 ```http
 DELETE /api/config/{key}
-X-API-Key: your-api-key
+Authorization: Bearer {session-token}
 ```
 
 **响应:**
@@ -295,27 +303,36 @@ GET /health
 ### cURL 示例
 
 ```bash
-# 获取所有配置
+# 获取所有配置（使用 API Key - 只读）
 curl -H "X-API-Key: your-api-key" \
   https://configr.modelbridge.cc/api/config
 
-# 创建配置
+# 获取单个配置（使用 API Key - 只读）
+curl -H "X-API-Key: your-api-key" \
+  https://configr.modelbridge.cc/api/config/app.name
+
+# 登录获取 Session Token
+TOKEN=$(curl -s -X POST https://configr.modelbridge.cc/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"password":"your-password"}' | jq -r '.token')
+
+# 创建配置（需要 Session Token）
 curl -X POST \
-  -H "X-API-Key: your-api-key" \
+  -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"key":"app.name","value":"My App"}' \
   https://configr.modelbridge.cc/api/config
 
-# 更新配置
+# 更新配置（需要 Session Token）
 curl -X PUT \
-  -H "X-API-Key: your-api-key" \
+  -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"value":"New Value"}' \
   https://configr.modelbridge.cc/api/config/app.name
 
-# 删除配置
+# 删除配置（需要 Session Token）
 curl -X DELETE \
-  -H "X-API-Key: your-api-key" \
+  -H "Authorization: Bearer $TOKEN" \
   https://configr.modelbridge.cc/api/config/app.name
 ```
 
@@ -413,14 +430,17 @@ def delete_config(key):
 
 ### 认证机制
 
-1. **API Key 认证**: 用于外部程序调用
+1. **API Key 认证（只读权限）**: 用于外部程序读取配置
    - 在请求头中添加 `X-API-Key`
    - 通过环境变量 `API_KEY` 配置
+   - **仅支持 GET 请求**（读取操作）
+   - 尝试修改操作会返回 403 错误
 
-2. **Session Token 认证**: 用于 Web 界面
+2. **Session Token 认证（完全权限）**: 用于 Web 界面
    - 登录后获取 Token
    - Token 有效期 24 小时
    - 在请求头中添加 `Authorization: Bearer {token}`
+   - 支持所有操作（增删改查）
 
 ### 最佳实践
 
