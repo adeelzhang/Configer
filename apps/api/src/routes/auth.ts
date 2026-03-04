@@ -1,5 +1,5 @@
 import { Hono } from 'hono';
-import { createSession, verifyPassword, getApiKey } from '../middleware/auth.js';
+import { createSession, verifyPassword } from '../middleware/auth.js';
 
 const app = new Hono();
 
@@ -22,17 +22,6 @@ app.post('/login', async (c) => {
   } catch (error: any) {
     return c.json({ error: error.message }, 500);
   }
-});
-
-// 获取 API Key（需要先登录）
-app.get('/api-key', async (c) => {
-  const sessionToken = c.req.header('Authorization')?.replace('Bearer ', '');
-  if (!sessionToken) {
-    return c.json({ error: 'Unauthorized' }, 401);
-  }
-
-  const apiKey = getApiKey();
-  return c.json({ apiKey });
 });
 
 export default app;
