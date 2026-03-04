@@ -11,7 +11,6 @@ RUN npm install
 
 # 复制源代码
 COPY apps/api ./apps/api
-COPY tsconfig.json ./
 
 # 构建
 RUN npm run build:api
